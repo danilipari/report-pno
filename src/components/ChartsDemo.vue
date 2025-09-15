@@ -8,9 +8,9 @@
             <GaugeChart
             :value="(2269.86 / 3456.90) * 100"
             :min="0"
-            :max="100"
+            :max="3456.90"
             label="%"
-            suffix="%"
+            suffix="€"
             color="#60a5fa"
             backgroundColor="#dbeafe"
             />
@@ -20,7 +20,7 @@
           <GaugeChart
             :value="(15432.46 / 93000) * 100"
             :min="0"
-            :max="100"
+            :max="93000"
             label="%"
             suffix=" €"
             color="#60a5fa"
@@ -32,7 +32,7 @@
           <GaugeChart
             :value="(-829.10 / 16852.11) * 100"
             :min="0"
-            :max="100"
+            :max="16852.11"
             label="%"
             suffix=" €"
             color="#fca5a5"

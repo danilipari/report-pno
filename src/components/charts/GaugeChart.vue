@@ -29,6 +29,7 @@ interface Props {
   backgroundColor?: string
   strokeWidth?: number
   decimals?: number
+  allowNegative?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -42,7 +43,8 @@ const props = withDefaults(defineProps<Props>(), {
   color: '#60a5fa',
   backgroundColor: '#dbeafe',
   strokeWidth: 25,
-  decimals: 1
+  decimals: 1,
+  allowNegative: false
 })
 
 const svgRef = ref<SVGSVGElement>()
@@ -50,6 +52,13 @@ const svgRef = ref<SVGSVGElement>()
 const formattedValue = computed(() => {
   const val = props.value.toFixed(props.decimals)
   return `${props.prefix}${val}${props.label}`
+})
+
+const displayValue = computed(() => {
+  if (!props.allowNegative && props.value < 0) {
+    return 0
+  }
+  return Math.max(props.min, Math.min(props.max, props.value))
 })
 
 const formattedMin = computed(() => {
@@ -99,7 +108,7 @@ const drawGauge = () => {
     .attr('transform', `translate(${centerX}, ${centerY})`)
     .style('fill', props.backgroundColor)
 
-  const valueAngle = startAngle + ((props.value - props.min) / (props.max - props.min)) * Math.PI
+  const valueAngle = startAngle + ((displayValue.value - props.min) / (props.max - props.min)) * Math.PI
 
   const valueArc = d3.arc()
     .innerRadius(radius - props.strokeWidth)
@@ -133,7 +142,7 @@ onMounted(() => {
   drawGauge()
 })
 
-watch(() => props.value, () => {
+watch([() => props.value, displayValue], () => {
   drawGauge()
 })
 </script>
@@ -149,7 +158,7 @@ watch(() => props.value, () => {
 }
 
 .gauge-value {
-  margin-top: 25px;
+  margin-top: 3rem;
   font-size: 1.8rem;
   font-weight: 600;
   color: #1f2937;
