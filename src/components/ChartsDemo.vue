@@ -4,7 +4,7 @@
 
     <div class="mb-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="p-4 bg-gray-50 rounded-lg">
+        <div class="p-4 bg-gray-50 rounded-lg flex justify-center items-center">
             <GaugeChart
             :value="(2269.86 / 3456.90) * 100"
             :min="0"
@@ -16,7 +16,7 @@
             />
         </div>
 
-        <div class="p-4 bg-gray-50 rounded-lg">
+        <div class="p-4 bg-gray-50 rounded-lg flex justify-center items-center">
           <GaugeChart
             :value="(15432.46 / 93000) * 100"
             :min="0"
@@ -28,7 +28,7 @@
           />
         </div>
 
-        <div class="p-4 bg-gray-50 rounded-lg">
+        <div class="p-4 bg-gray-50 rounded-lg flex justify-center items-center">
           <GaugeChart
             :value="(-829.10 / 16852.11) * 100"
             :min="0"
