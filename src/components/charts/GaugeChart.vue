@@ -158,7 +158,7 @@ watch([() => props.value, displayValue], () => {
 }
 
 .gauge-value {
-  margin-top: 3rem;
+  margin-top: 2.5rem;
   font-size: 1.8rem;
   font-weight: 600;
   color: #1f2937;
