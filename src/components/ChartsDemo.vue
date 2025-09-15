@@ -41,12 +41,17 @@
         </div>
       </div>
     </div>
+
+    <div class="mt-8">
+      <AreaProjectionChart />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import GaugeChart from './charts/GaugeChart.vue'
+import AreaProjectionChart from './charts/AreaProjectionChart.vue'
 
 const cpuUsage = ref(45)
 const memoryUsage = ref(60)

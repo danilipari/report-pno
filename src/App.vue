@@ -24,7 +24,7 @@ const activeTab = ref('charts')
               : 'bg-white text-gray-700 hover:bg-gray-100'
           ]"
         >
-          D3.js Charts
+          Charts
         </button>
         <button
           @click="activeTab = 'tables'"
@@ -35,7 +35,7 @@ const activeTab = ref('charts')
               : 'bg-white text-gray-700 hover:bg-gray-100'
           ]"
         >
-          TanStack Tables
+          Tables
         </button>
         <button
           @click="activeTab = 'reports'"
@@ -46,7 +46,7 @@ const activeTab = ref('charts')
               : 'bg-white text-gray-700 hover:bg-gray-100'
           ]"
         >
-          Pinia Store
+          Store
         </button>
       </div>
 
