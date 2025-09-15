@@ -125,12 +125,6 @@ const drawChart = () => {
     .y1(d => yScale(d.actual))
     .curve(d3.curveCatmullRom)
 
-  const projectedArea = d3.area<any>()
-    .x(d => xScale(d.date))
-    .y0(innerHeight)
-    .y1(d => yScale(d.projected))
-    .curve(d3.curveCatmullRom)
-
   const actualLine = d3.line<any>()
     .x(d => xScale(d.date))
     .y(d => yScale(d.actual))
@@ -209,39 +203,6 @@ const drawChart = () => {
   g.append('g')
     .attr('class', 'y-axis')
     .call(yAxis)
-
-  const legend = g.append('g')
-    .attr('class', 'legend')
-    .attr('transform', `translate(${innerWidth - 150}, 20)`)
-
-  const legendData = [
-    { label: 'Actual', color: '#dc2626', dasharray: 'none' },
-    { label: 'Projected', color: '#3b82f6', dasharray: '8,4' }
-  ]
-
-  const legendItems = legend.selectAll('.legend-item')
-    .data(legendData)
-    .enter()
-    .append('g')
-    .attr('class', 'legend-item')
-    .attr('transform', (d, i) => `translate(0, ${i * 25})`)
-
-  legendItems.append('line')
-    .attr('x1', 0)
-    .attr('x2', 20)
-    .attr('y1', 0)
-    .attr('y2', 0)
-    .style('stroke', d => d.color)
-    .style('stroke-width', 2)
-    .style('stroke-dasharray', d => d.dasharray)
-
-  legendItems.append('text')
-    .attr('x', 25)
-    .attr('y', 5)
-    .text(d => d.label)
-    .style('font-size', '12px')
-    .style('fill', '#374151')
-
 }
 
 onMounted(() => {

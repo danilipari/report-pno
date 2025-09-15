@@ -175,48 +175,6 @@ const drawChart = () => {
   g.append('g')
     .attr('class', 'y-axis')
     .call(yAxis)
-
-  const legend = g.append('g')
-    .attr('class', 'legend')
-    .attr('transform', `translate(${innerWidth - 150}, 20)`)
-
-  const legendData = [
-    { label: 'Bars (Positive)', color: '#22c55e', type: 'bar' },
-    { label: 'Bars (Negative)', color: '#ef4444', type: 'bar' },
-    { label: 'Line', color: '#3b82f6', type: 'line' }
-  ]
-
-  const legendItems = legend.selectAll('.legend-item')
-    .data(legendData)
-    .enter()
-    .append('g')
-    .attr('class', 'legend-item')
-    .attr('transform', (_, i) => `translate(0, ${i * 25})`)
-
-  legendItems.each(function(d) {
-    const item = d3.select(this)
-    if (d.type === 'bar') {
-      item.append('rect')
-        .attr('width', 15)
-        .attr('height', 10)
-        .style('fill', d.color)
-    } else {
-      item.append('line')
-        .attr('x1', 0)
-        .attr('x2', 15)
-        .attr('y1', 5)
-        .attr('y2', 5)
-        .style('stroke', d.color)
-        .style('stroke-width', 3)
-    }
-  })
-
-  legendItems.append('text')
-    .attr('x', 20)
-    .attr('y', 8)
-    .text(d => d.label)
-    .style('font-size', '12px')
-    .style('fill', '#374151')
 }
 
 onMounted(() => {
