@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import ReportTest from './components/ReportTest.vue'
 </script>
 
 <template>
@@ -8,11 +9,7 @@
         PNO System
       </h1>
 
-      <div class="mt-8 text-center">
-        <button class="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
-          Test Button
-        </button>
-      </div>
+      <ReportTest />
     </div>
   </div>
 </template>
