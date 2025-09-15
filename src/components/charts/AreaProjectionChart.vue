@@ -23,7 +23,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  title: 'Area Chart with Projections',
+  title: 'Area Chart',
   width: 800,
   height: 400,
   data: () => [
