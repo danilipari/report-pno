@@ -116,33 +116,6 @@ const drawChart = () => {
     .style('stroke', '#e5e7eb')
     .style('stroke-width', 1)
 
-  const barGradientPositive = svg.append('defs')
-    .append('linearGradient')
-    .attr('id', 'barGradientPositive')
-    .attr('x1', '0%').attr('y1', '0%')
-    .attr('x2', '100%').attr('y2', '100%')
-
-  barGradientPositive.append('stop')
-    .attr('offset', '0%')
-    .attr('stop-color', '#22c55e')
-
-  barGradientPositive.append('stop')
-    .attr('offset', '100%')
-    .attr('stop-color', '#16a34a')
-
-  const barGradientNegative = svg.append('defs')
-    .append('linearGradient')
-    .attr('id', 'barGradientNegative')
-    .attr('x1', '0%').attr('y1', '0%')
-    .attr('x2', '100%').attr('y2', '100%')
-
-  barGradientNegative.append('stop')
-    .attr('offset', '0%')
-    .attr('stop-color', '#ef4444')
-
-  barGradientNegative.append('stop')
-    .attr('offset', '100%')
-    .attr('stop-color', '#dc2626')
 
   const barsData = data.filter(d => d.barValue > 0)
 
@@ -158,39 +131,9 @@ const drawChart = () => {
     .attr('y', d => yScale(d.barValue))
     .attr('width', xScale.bandwidth())
     .attr('height', d => innerHeight - yScale(d.barValue))
-    .style('fill', d => d.barType === 'positive' ? 'url(#barGradientPositive)' : 'url(#barGradientNegative)')
-    .style('stroke', d => d.barType === 'positive' ? '#16a34a' : '#dc2626')
-    .style('stroke-width', 1)
-
-  g.selectAll('.bar-shadow')
-    .data(barsData)
-    .enter()
-    .append('rect')
-    .attr('class', 'bar-shadow')
-    .attr('x', (d) => {
-      const originalIndex = data.findIndex(item => item.date.getTime() === d.date.getTime())
-      return xScale(originalIndex.toString())! + xScale.bandwidth() + 2
-    })
-    .attr('y', d => yScale(d.barValue) + 4)
-    .attr('width', 6)
-    .attr('height', d => innerHeight - yScale(d.barValue))
-    .style('fill', '#00000020')
-
-  g.selectAll('.bar-top')
-    .data(barsData)
-    .enter()
-    .append('polygon')
-    .attr('class', 'bar-top')
-    .attr('points', (d) => {
-      const originalIndex = data.findIndex(item => item.date.getTime() === d.date.getTime())
-      const x = xScale(originalIndex.toString())!
-      const y = yScale(d.barValue)
-      const w = xScale.bandwidth()
-      return `${x},${y} ${x + w},${y} ${x + w + 6},${y - 4} ${x + 6},${y - 4}`
-    })
     .style('fill', d => d.barType === 'positive' ? '#22c55e' : '#ef4444')
-    .style('stroke', d => d.barType === 'positive' ? '#16a34a' : '#dc2626')
-    .style('stroke-width', 1)
+
+
 
   const line = d3.line<any>()
     .x((_, i) => xScale(i.toString())! + xScale.bandwidth() / 2)
@@ -204,17 +147,6 @@ const drawChart = () => {
     .style('stroke', '#3b82f6')
     .style('stroke-width', 3)
 
-  g.selectAll('.line-point')
-    .data(data)
-    .enter()
-    .append('circle')
-    .attr('class', 'line-point')
-    .attr('cx', (_, i) => xScale(i.toString())! + xScale.bandwidth() / 2)
-    .attr('cy', d => yScale(d.lineValue))
-    .attr('r', 4)
-    .style('fill', '#3b82f6')
-    .style('stroke', 'white')
-    .style('stroke-width', 2)
 
   g.append('g')
     .attr('class', 'x-axis')
