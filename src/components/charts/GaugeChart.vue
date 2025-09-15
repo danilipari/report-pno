@@ -3,7 +3,6 @@
     <svg ref="svgRef" :width="width" :height="height"></svg>
     <div class="gauge-text" :style="textStyle">
       <div class="gauge-value">{{ formattedValue }}</div>
-      <!-- <div class="gauge-label">{{ label }}</div> -->
     </div>
     <div class="gauge-limits">
       <span class="limit-min">{{ formattedMin }}</span>
@@ -30,6 +29,8 @@ interface Props {
   strokeWidth?: number
   decimals?: number
   allowNegative?: boolean
+  displayMin?: number
+  displayMax?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -44,17 +45,20 @@ const props = withDefaults(defineProps<Props>(), {
   backgroundColor: '#dbeafe',
   strokeWidth: 25,
   decimals: 1,
-  allowNegative: false
+  allowNegative: false,
+  displayMin: undefined,
+  displayMax: undefined
 })
 
 const svgRef = ref<SVGSVGElement>()
 
 const formattedValue = computed(() => {
-  const val = props.value.toFixed(props.decimals)
+  const valueToShow = props.value
+  const val = valueToShow.toFixed(props.decimals)
   return `${props.prefix}${val}${props.label}`
 })
 
-const displayValue = computed(() => {
+const gaugeValue = computed(() => {
   if (!props.allowNegative && props.value < 0) {
     return 0
   }
@@ -62,14 +66,16 @@ const displayValue = computed(() => {
 })
 
 const formattedMin = computed(() => {
-  return `${props.prefix}${props.min.toLocaleString('it-IT', {
+  const minToShow = props.displayMin !== undefined ? props.displayMin : props.min
+  return `${props.prefix}${minToShow.toLocaleString('it-IT', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}${props.suffix}`
 })
 
 const formattedMax = computed(() => {
-  return `${props.prefix}${props.max.toLocaleString('it-IT', {
+  const maxToShow = props.displayMax !== undefined ? props.displayMax : props.max
+  return `${props.prefix}${maxToShow.toLocaleString('it-IT', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}${props.suffix}`
@@ -108,7 +114,7 @@ const drawGauge = () => {
     .attr('transform', `translate(${centerX}, ${centerY})`)
     .style('fill', props.backgroundColor)
 
-  const valueAngle = startAngle + ((displayValue.value - props.min) / (props.max - props.min)) * Math.PI
+  const valueAngle = startAngle + ((gaugeValue.value - props.min) / (props.max - props.min)) * Math.PI
 
   const valueArc = d3.arc()
     .innerRadius(radius - props.strokeWidth)
@@ -142,7 +148,7 @@ onMounted(() => {
   drawGauge()
 })
 
-watch([() => props.value, displayValue], () => {
+watch([() => props.value, gaugeValue, () => props.displayMin, () => props.displayMax], () => {
   drawGauge()
 })
 </script>
