@@ -1,12 +1,12 @@
 <template>
-  <div class="mixed-chart">
+  <div class="mixed-chart" ref="containerRef">
     <h3 class="text-lg font-semibold mb-4">{{ title }}</h3>
-    <svg ref="svgRef" :width="width" :height="height"></svg>
+    <svg ref="svgRef" :width="containerWidth" :height="containerHeight"></svg>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import * as d3 from 'd3'
 
 interface DataPoint {
@@ -62,6 +62,19 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const svgRef = ref<SVGSVGElement>()
+const containerRef = ref<HTMLDivElement>()
+const containerWidth = ref(1000)
+const containerHeight = ref(400)
+
+let resizeObserver: ResizeObserver | null = null
+
+const updateDimensions = () => {
+  if (containerRef.value) {
+    const rect = containerRef.value.getBoundingClientRect()
+    containerWidth.value = Math.max(400, rect.width - 32)
+    containerHeight.value = Math.max(250, Math.min(400, rect.width * 0.4))
+  }
+}
 
 const drawChart = () => {
   if (!svgRef.value) return
@@ -69,8 +82,8 @@ const drawChart = () => {
   d3.select(svgRef.value).selectAll('*').remove()
 
   const margin = { top: 20, right: 80, bottom: 80, left: 80 }
-  const innerWidth = props.width - margin.left - margin.right
-  const innerHeight = props.height - margin.top - margin.bottom
+  const innerWidth = containerWidth.value - margin.left - margin.right
+  const innerHeight = containerHeight.value - margin.top - margin.bottom
 
   const svg = d3.select(svgRef.value)
   const g = svg.append('g')
@@ -207,6 +220,27 @@ const drawChart = () => {
 }
 
 onMounted(() => {
+  updateDimensions()
+
+  resizeObserver = new ResizeObserver(() => {
+    updateDimensions()
+    drawChart()
+  })
+
+  if (containerRef.value) {
+    resizeObserver.observe(containerRef.value)
+  }
+
+  drawChart()
+})
+
+onUnmounted(() => {
+  if (resizeObserver && containerRef.value) {
+    resizeObserver.unobserve(containerRef.value)
+  }
+})
+
+watch([containerWidth, containerHeight], () => {
   drawChart()
 })
 
