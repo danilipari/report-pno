@@ -9,7 +9,6 @@
       <span class="limit-max">{{ formattedMax }}</span>
     </div>
 
-    <!-- HTML Tooltip -->
     <div
       ref="tooltipRef"
       class="gauge-tooltip-html"
@@ -125,10 +124,11 @@ const drawGauge = () => {
     .startAngle(startAngle)
     .endAngle(endAngle)
 
-  svg.append('path')
+  const backgroundPath = svg.append('path')
     .attr('d', backgroundArc as any)
     .attr('transform', `translate(${centerX}, ${centerY})`)
     .style('fill', props.backgroundColor)
+    .attr('class', 'gauge-background-path')
 
   const valueAngle = startAngle + ((gaugeValue.value - props.min) / (props.max - props.min)) * Math.PI
 
@@ -142,6 +142,7 @@ const drawGauge = () => {
     .attr('d', valueArc as any)
     .attr('transform', `translate(${centerX}, ${centerY})`)
     .style('fill', props.color)
+    .attr('class', 'gauge-filled-path')
 
   valuePath
     .transition()
@@ -170,13 +171,14 @@ const drawGauge = () => {
     return null
   }
 
-  svg.append('path')
-    .datum({ endAngle: endAngle })
-    .attr('d', backgroundArc as any)
+  const filledPath = svg.append('path')
+    .attr('d', valueArc as any)
     .attr('transform', `translate(${centerX}, ${centerY})`)
     .style('fill', 'transparent')
     .style('cursor', 'pointer')
     .on('mouseenter', function() {
+      valuePath.style('filter', 'brightness(0.75)')
+
       const euroValues = calculateEuroValues()
       if (euroValues) {
         tooltipValue.value = `€${euroValues.filled.toLocaleString('it-IT', {
@@ -194,6 +196,48 @@ const drawGauge = () => {
       tooltipVisible.value = true
     })
     .on('mouseleave', function() {
+      valuePath.style('filter', 'brightness(1)')
+      tooltipVisible.value = false
+    })
+
+  const remainingArc = d3.arc()
+    .innerRadius(radius - props.strokeWidth)
+    .outerRadius(radius)
+    .startAngle(valueAngle)
+    .endAngle(endAngle)
+
+  const remainingPath = svg.append('path')
+    .attr('d', remainingArc as any)
+    .attr('transform', `translate(${centerX}, ${centerY})`)
+    .style('fill', 'transparent')
+    .style('cursor', 'pointer')
+    .on('mouseenter', function() {
+      const remainingHighlight = svg.append('path')
+        .attr('d', remainingArc as any)
+        .attr('transform', `translate(${centerX}, ${centerY})`)
+        .style('fill', 'rgba(0, 0, 0, 0.2)')
+        .style('pointer-events', 'none')
+        .attr('class', 'remaining-highlight')
+
+      const euroValues = calculateEuroValues()
+      if (euroValues) {
+        tooltipValue.value = `€${euroValues.remaining.toLocaleString('it-IT', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`
+        tooltipRemaining.value = `Restante: €${euroValues.remaining.toLocaleString('it-IT', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`
+      } else {
+        const remaining = (100 - gaugeValue.value)
+        tooltipValue.value = `${remaining.toFixed(1)}%`
+        tooltipRemaining.value = `Restante: ${remaining.toFixed(1)}%`
+      }
+      tooltipVisible.value = true
+    })
+    .on('mouseleave', function() {
+      svg.select('.remaining-highlight').remove()
       tooltipVisible.value = false
     })
 }
