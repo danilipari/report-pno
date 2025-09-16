@@ -8,6 +8,18 @@
       <span class="limit-min">{{ formattedMin }}</span>
       <span class="limit-max">{{ formattedMax }}</span>
     </div>
+
+    <!-- HTML Tooltip -->
+    <div
+      ref="tooltipRef"
+      class="gauge-tooltip-html"
+      :style="{ opacity: tooltipVisible ? 1 : 0 }"
+    >
+      <div class="tooltip-content">
+        <div class="tooltip-value" :style="{ color: color }">{{ tooltipValue }}</div>
+        <div class="tooltip-remaining">{{ tooltipRemaining }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -51,6 +63,10 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const svgRef = ref<SVGSVGElement>()
+const tooltipRef = ref<HTMLDivElement>()
+const tooltipVisible = ref(false)
+const tooltipValue = ref('')
+const tooltipRemaining = ref('')
 
 const formattedValue = computed(() => {
   const valueToShow = props.value
@@ -142,6 +158,44 @@ const drawGauge = () => {
         return currentArc(null as any) as string
       }
     })
+
+  const calculateEuroValues = () => {
+    if (props.displayMin !== undefined && props.displayMax !== undefined) {
+      const percentage = gaugeValue.value / 100
+      const totalRange = props.displayMax - props.displayMin
+      const filledValue = props.displayMin + (totalRange * percentage)
+      const remainingValue = props.displayMax - filledValue
+      return { filled: filledValue, remaining: remainingValue, total: props.displayMax }
+    }
+    return null
+  }
+
+  svg.append('path')
+    .datum({ endAngle: endAngle })
+    .attr('d', backgroundArc as any)
+    .attr('transform', `translate(${centerX}, ${centerY})`)
+    .style('fill', 'transparent')
+    .style('cursor', 'pointer')
+    .on('mouseenter', function() {
+      const euroValues = calculateEuroValues()
+      if (euroValues) {
+        tooltipValue.value = `€${euroValues.filled.toLocaleString('it-IT', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`
+        tooltipRemaining.value = `Mancano: €${euroValues.remaining.toLocaleString('it-IT', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        })}`
+      } else {
+        tooltipValue.value = `${gaugeValue.value.toFixed(1)}%`
+        tooltipRemaining.value = `Mancano: ${(100 - gaugeValue.value).toFixed(1)}%`
+      }
+      tooltipVisible.value = true
+    })
+    .on('mouseleave', function() {
+      tooltipVisible.value = false
+    })
 }
 
 onMounted(() => {
@@ -195,5 +249,35 @@ watch([() => props.value, gaugeValue, () => props.displayMin, () => props.displa
 
 .limit-max {
   text-align: right;
+}
+
+.gauge-tooltip-html {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.tooltip-content {
+  text-align: center;
+}
+
+.tooltip-value {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.tooltip-remaining {
+  color: #9ca3af;
+  font-size: 11px;
 }
 </style>
