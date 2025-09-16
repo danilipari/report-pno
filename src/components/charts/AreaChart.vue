@@ -190,6 +190,136 @@ const drawChart = () => {
     .style('stroke-width', 2)
     .style('stroke-dasharray', '8,4')
 
+  // Hover elements
+  const focus = g.append('g')
+    .attr('class', 'focus')
+    .style('display', 'none')
+
+  // Vertical line
+  focus.append('line')
+    .attr('class', 'hover-line')
+    .style('stroke', '#6b7280')
+    .style('stroke-width', 1)
+    .style('stroke-dasharray', '3,3')
+    .style('shape-rendering', 'crispEdges')
+
+  // Point on projected line
+  focus.append('circle')
+    .attr('class', 'hover-point-projected')
+    .attr('r', 5)
+    .style('fill', '#3b82f6')
+    .style('stroke', 'white')
+    .style('stroke-width', 2)
+
+  // Point on actual line
+  focus.append('circle')
+    .attr('class', 'hover-point-actual')
+    .attr('r', 5)
+    .style('fill', '#dc2626')
+    .style('stroke', 'white')
+    .style('stroke-width', 2)
+
+  // Tooltip
+  const tooltip = g.append('g')
+    .attr('class', 'tooltip')
+    .style('display', 'none')
+
+  const tooltipRect = tooltip.append('rect')
+    .attr('rx', 4)
+    .attr('ry', 4)
+    .style('fill', 'rgba(0, 0, 0, 0.8)')
+
+  const tooltipDate = tooltip.append('text')
+    .attr('class', 'tooltip-date')
+    .attr('x', 10)
+    .attr('y', 20)
+    .style('fill', 'white')
+    .style('font-size', '12px')
+    .style('font-weight', 'bold')
+
+  const tooltipActual = tooltip.append('text')
+    .attr('class', 'tooltip-actual')
+    .attr('x', 10)
+    .attr('y', 38)
+    .style('fill', '#ef4444')
+    .style('font-size', '11px')
+
+  const tooltipProjected = tooltip.append('text')
+    .attr('class', 'tooltip-projected')
+    .attr('x', 10)
+    .attr('y', 54)
+    .style('fill', '#60a5fa')
+    .style('font-size', '11px')
+
+  // Overlay for mouse events
+  g.append('rect')
+    .attr('class', 'overlay')
+    .attr('width', innerWidth)
+    .attr('height', innerHeight)
+    .style('fill', 'none')
+    .style('pointer-events', 'all')
+    .on('mouseover', function() {
+      focus.style('display', null)
+      tooltip.style('display', null)
+    })
+    .on('mouseout', function() {
+      focus.style('display', 'none')
+      tooltip.style('display', 'none')
+    })
+    .on('mousemove', function(event) {
+      const bisectDate = d3.bisector((d: any) => d.date).left
+      const x0 = xScale.invert(d3.pointer(event, this)[0])
+      const i = bisectDate(data, x0, 1)
+      const d0 = data[i - 1]
+      const d1 = data[i]
+      const d = d1 && x0 - d0.date > d1.date - x0 ? d1 : d0
+
+      if (!d) return
+
+      // Update vertical line
+      focus.select('.hover-line')
+        .attr('x1', xScale(d.date))
+        .attr('x2', xScale(d.date))
+        .attr('y1', 0)
+        .attr('y2', innerHeight)
+
+      // Update points
+      focus.select('.hover-point-projected')
+        .attr('cx', xScale(d.date))
+        .attr('cy', yScale(d.projected))
+
+      focus.select('.hover-point-actual')
+        .attr('cx', xScale(d.date))
+        .attr('cy', yScale(d.actual))
+
+      // Update tooltip content
+      tooltipDate.text(d3.timeFormat('%d/%m/%Y')(d.date))
+      tooltipActual.text(`Actual: €${d.actual.toLocaleString('it-IT')}`)
+      tooltipProjected.text(`Projected: €${d.projected.toLocaleString('it-IT')}`)
+
+      // Calculate tooltip dimensions
+      const dateWidth = (tooltipDate.node() as any).getComputedTextLength()
+      const actualWidth = (tooltipActual.node() as any).getComputedTextLength()
+      const projectedWidth = (tooltipProjected.node() as any).getComputedTextLength()
+      const maxWidth = Math.max(dateWidth, actualWidth, projectedWidth) + 20
+      const tooltipHeight = 64
+
+      tooltipRect
+        .attr('width', maxWidth)
+        .attr('height', tooltipHeight)
+
+      // Position tooltip
+      const xPos = xScale(d.date)
+      const yPos = Math.min(yScale(d.projected), yScale(d.actual)) - 70
+
+      // Keep tooltip within bounds
+      let tooltipX = xPos - maxWidth / 2
+      if (tooltipX < 0) tooltipX = 0
+      if (tooltipX + maxWidth > innerWidth) tooltipX = innerWidth - maxWidth
+
+      tooltip.attr('transform', `translate(${tooltipX}, ${yPos})`)
+    })
+
   g.append('g')
     .attr('class', 'x-axis')
     .attr('transform', `translate(0, ${innerHeight})`)

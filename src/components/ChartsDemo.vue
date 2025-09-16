@@ -50,7 +50,7 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
       <div class="p-4 bg-gray-50 rounded-lg">
-        <AreaProjectionChart />
+        <AreaChart />
       </div>
       <div class="p-4 bg-gray-50 rounded-lg">
         <MixedChart />
@@ -62,7 +62,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import GaugeChart from './charts/GaugeChart.vue'
-import AreaProjectionChart from './charts/AreaProjectionChart.vue'
+import AreaChart from './charts/AreaChart.vue'
 import MixedChart from './charts/MixedChart.vue'
 
 const cpuUsage = ref(45)
