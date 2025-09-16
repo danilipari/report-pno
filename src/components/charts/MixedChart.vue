@@ -2,6 +2,17 @@
   <div class="mixed-chart" ref="containerRef">
     <h3 class="text-lg font-semibold mb-4">{{ title }}</h3>
     <svg ref="svgRef" :width="containerWidth" :height="containerHeight"></svg>
+
+    <div
+      ref="tooltipRef"
+      class="mixed-chart-tooltip"
+      :style="{ opacity: tooltipVisible ? 1 : 0 }"
+    >
+      <div class="tooltip-content">
+        <div class="tooltip-date">{{ tooltipDate }}</div>
+        <div class="tooltip-value">{{ tooltipValue }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -63,8 +74,12 @@ const props = withDefaults(defineProps<Props>(), {
 
 const svgRef = ref<SVGSVGElement>()
 const containerRef = ref<HTMLDivElement>()
+const tooltipRef = ref<HTMLDivElement>()
 const containerWidth = ref(1000)
 const containerHeight = ref(400)
+const tooltipVisible = ref(false)
+const tooltipDate = ref('')
+const tooltipValue = ref('')
 
 let resizeObserver: ResizeObserver | null = null
 
@@ -145,6 +160,25 @@ const drawChart = () => {
     .attr('width', xScale.bandwidth())
     .attr('height', d => innerHeight - yScale(d.barValue))
     .style('fill', d => d.barType === 'positive' ? '#22c55e' : '#ef4444')
+    .style('cursor', 'pointer')
+    .on('mouseenter', function(event, d) {
+      d3.select(this).style('opacity', 0.8)
+      tooltipDate.value = d3.timeFormat('%d/%m/%Y')(d.date)
+      tooltipValue.value = `€${d.barValue.toLocaleString('it-IT')}`
+      tooltipVisible.value = true
+
+      const rect = containerRef.value!.getBoundingClientRect()
+      const tooltipRect = tooltipRef.value!.getBoundingClientRect()
+      const mouseX = event.clientX - rect.left
+      const mouseY = event.clientY - rect.top
+
+      tooltipRef.value!.style.left = `${Math.min(mouseX - tooltipRect.width / 2, rect.width - tooltipRect.width - 10)}px`
+      tooltipRef.value!.style.top = `${mouseY - tooltipRect.height - 10}px`
+    })
+    .on('mouseleave', function() {
+      d3.select(this).style('opacity', 1)
+      tooltipVisible.value = false
+    })
 
 
 
@@ -159,6 +193,35 @@ const drawChart = () => {
     .style('fill', 'none')
     .style('stroke', '#3b82f6')
     .style('stroke-width', 3)
+
+  g.selectAll('.line-point')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('class', 'line-point')
+    .attr('cx', (_, i) => xScale(i.toString())! + xScale.bandwidth() / 2)
+    .attr('cy', d => yScale(d.lineValue))
+    .attr('r', 4)
+    .style('fill', '#3b82f6')
+    .style('cursor', 'pointer')
+    .on('mouseenter', function(event, d) {
+      d3.select(this).attr('r', 6).style('fill', '#1d4ed8')
+      tooltipDate.value = d3.timeFormat('%d/%m/%Y')(d.date)
+      tooltipValue.value = `€${d.lineValue.toLocaleString('it-IT')}`
+      tooltipVisible.value = true
+
+      const rect = containerRef.value!.getBoundingClientRect()
+      const tooltipRect = tooltipRef.value!.getBoundingClientRect()
+      const mouseX = event.clientX - rect.left
+      const mouseY = event.clientY - rect.top
+
+      tooltipRef.value!.style.left = `${Math.min(mouseX - tooltipRect.width / 2, rect.width - tooltipRect.width - 10)}px`
+      tooltipRef.value!.style.top = `${mouseY - tooltipRect.height - 10}px`
+    })
+    .on('mouseleave', function() {
+      d3.select(this).attr('r', 4).style('fill', '#3b82f6')
+      tooltipVisible.value = false
+    })
 
 
   g.append('g')
@@ -212,5 +275,33 @@ watch(() => props.data, () => {
   background: white;
   border-radius: 8px;
   padding: 16px;
+  position: relative;
+}
+
+.mixed-chart-tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.tooltip-content {
+  text-align: center;
+}
+
+.tooltip-date {
+  font-size: 10px;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+
+.tooltip-value {
+  font-weight: bold;
 }
 </style>
