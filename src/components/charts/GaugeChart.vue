@@ -185,13 +185,10 @@ const drawGauge = () => {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         })}`
-        tooltipRemaining.value = `Mancano: €${euroValues.remaining.toLocaleString('it-IT', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })}`
+        tooltipRemaining.value = ``
       } else {
         tooltipValue.value = `${gaugeValue.value.toFixed(1)}%`
-        tooltipRemaining.value = `Mancano: ${(100 - gaugeValue.value).toFixed(1)}%`
+        tooltipRemaining.value = ``
       }
       tooltipVisible.value = true
     })
@@ -225,14 +222,11 @@ const drawGauge = () => {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
         })}`
-        tooltipRemaining.value = `Restante: €${euroValues.remaining.toLocaleString('it-IT', {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })}`
+        tooltipRemaining.value = ``
       } else {
         const remaining = (100 - gaugeValue.value)
         tooltipValue.value = `${remaining.toFixed(1)}%`
-        tooltipRemaining.value = `Restante: ${remaining.toFixed(1)}%`
+        tooltipRemaining.value = ``
       }
       tooltipVisible.value = true
     })
