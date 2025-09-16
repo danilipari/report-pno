@@ -2,6 +2,19 @@
   <div class="area-projection-chart" ref="containerRef">
     <h3 class="text-lg font-semibold mb-4">{{ title }}</h3>
     <svg ref="svgRef" :width="containerWidth" :height="containerHeight"></svg>
+
+    <!-- HTML Tooltip -->
+    <div
+      ref="tooltipRef"
+      class="area-tooltip-html"
+      :style="{ opacity: tooltipVisible ? 1 : 0 }"
+    >
+      <div class="tooltip-content">
+        <div class="tooltip-date">{{ tooltipDate }}</div>
+        <div class="tooltip-actual" :style="{ color: '#dc2626' }">{{ tooltipActual }}</div>
+        <div class="tooltip-projected" :style="{ color: '#3b82f6' }">{{ tooltipProjected }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -43,8 +56,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const svgRef = ref<SVGSVGElement>()
 const containerRef = ref<HTMLDivElement>()
+const tooltipRef = ref<HTMLDivElement>()
 const containerWidth = ref(800)
 const containerHeight = ref(400)
+const tooltipVisible = ref(false)
+const tooltipDate = ref('')
+const tooltipActual = ref('')
+const tooltipProjected = ref('')
 
 let resizeObserver: ResizeObserver | null = null
 
@@ -219,37 +237,6 @@ const drawChart = () => {
     .style('stroke', 'white')
     .style('stroke-width', 2)
 
-  // Tooltip
-  const tooltip = g.append('g')
-    .attr('class', 'tooltip')
-    .style('display', 'none')
-
-  const tooltipRect = tooltip.append('rect')
-    .attr('rx', 4)
-    .attr('ry', 4)
-    .style('fill', 'rgba(0, 0, 0, 0.8)')
-
-  const tooltipDate = tooltip.append('text')
-    .attr('class', 'tooltip-date')
-    .attr('x', 10)
-    .attr('y', 20)
-    .style('fill', 'white')
-    .style('font-size', '12px')
-    .style('font-weight', 'bold')
-
-  const tooltipActual = tooltip.append('text')
-    .attr('class', 'tooltip-actual')
-    .attr('x', 10)
-    .attr('y', 38)
-    .style('fill', '#ef4444')
-    .style('font-size', '11px')
-
-  const tooltipProjected = tooltip.append('text')
-    .attr('class', 'tooltip-projected')
-    .attr('x', 10)
-    .attr('y', 54)
-    .style('fill', '#60a5fa')
-    .style('font-size', '11px')
 
   // Overlay for mouse events
   g.append('rect')
@@ -260,11 +247,11 @@ const drawChart = () => {
     .style('pointer-events', 'all')
     .on('mouseover', function() {
       focus.style('display', null)
-      tooltip.style('display', null)
+      tooltipVisible.value = true
     })
     .on('mouseout', function() {
       focus.style('display', 'none')
-      tooltip.style('display', 'none')
+      tooltipVisible.value = false
     })
     .on('mousemove', function(event) {
       const bisectDate = d3.bisector((d: any) => d.date).left
@@ -293,31 +280,19 @@ const drawChart = () => {
         .attr('cy', yScale(d.actual))
 
       // Update tooltip content
-      tooltipDate.text(d3.timeFormat('%d/%m/%Y')(d.date))
-      tooltipActual.text(`Actual: €${d.actual.toLocaleString('it-IT')}`)
-      tooltipProjected.text(`Projected: €${d.projected.toLocaleString('it-IT')}`)
-
-      // Calculate tooltip dimensions
-      const dateWidth = (tooltipDate.node() as any).getComputedTextLength()
-      const actualWidth = (tooltipActual.node() as any).getComputedTextLength()
-      const projectedWidth = (tooltipProjected.node() as any).getComputedTextLength()
-      const maxWidth = Math.max(dateWidth, actualWidth, projectedWidth) + 20
-      const tooltipHeight = 64
-
-      tooltipRect
-        .attr('width', maxWidth)
-        .attr('height', tooltipHeight)
+      tooltipDate.value = d3.timeFormat('%d/%m/%Y')(d.date)
+      tooltipActual.value = `Actual: €${d.actual.toLocaleString('it-IT')}`
+      tooltipProjected.value = `Projected: €${d.projected.toLocaleString('it-IT')}`
 
       // Position tooltip
       const xPos = xScale(d.date)
-      const yPos = Math.min(yScale(d.projected), yScale(d.actual)) - 70
+      const yPos = Math.min(yScale(d.projected), yScale(d.actual)) - 80
 
-      // Keep tooltip within bounds
-      let tooltipX = xPos - maxWidth / 2
-      if (tooltipX < 0) tooltipX = 0
-      if (tooltipX + maxWidth > innerWidth) tooltipX = innerWidth - maxWidth
-
-      tooltip.attr('transform', `translate(${tooltipX}, ${yPos})`)
+      if (tooltipRef.value) {
+        tooltipRef.value.style.left = `${xPos}px`
+        tooltipRef.value.style.top = `${yPos}px`
+        tooltipRef.value.style.transform = 'translateX(-50%)'
+      }
     })
 
   g.append('g')
@@ -367,8 +342,37 @@ watch(() => props.data, () => {
 
 <style scoped>
 .area-projection-chart {
+  position: relative;
   background: white;
   border-radius: 8px;
   padding: 16px;
+}
+
+.area-tooltip-html {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.tooltip-content {
+  text-align: left;
+}
+
+.tooltip-date {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.tooltip-actual,
+.tooltip-projected {
+  font-size: 11px;
+  margin-bottom: 2px;
 }
 </style>
