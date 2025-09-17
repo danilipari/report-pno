@@ -10,6 +10,13 @@ export default defineConfig({
       '.ngrok-free.app',
       '.ngrok.app',
       '.ngrok.io'
-    ]
+    ],
+    proxy: {
+      '/api': {
+        target: 'http://st-pno.test.k8s.dontouch.group',
+        changeOrigin: true,
+        secure: false
+      }
+    }
   }
 })

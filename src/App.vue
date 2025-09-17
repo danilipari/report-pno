@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import ChartsDemo from './components/ChartsDemo.vue'
 import VolumeDetailTableTanStack from './components/tables/VolumeDetailTableTanStack.vue'
 import ReportTest from './components/ReportTest.vue'
+import FiltersBar from './components/filters/FiltersBar.vue'
 
 const activeTab = ref('charts')
 </script>
@@ -48,6 +49,7 @@ const activeTab = ref('charts')
       </div>
 
       <div v-if="activeTab === 'charts'" class="space-y-8">
+        <FiltersBar />
         <ChartsDemo />
         <VolumeDetailTableTanStack />
       </div>
