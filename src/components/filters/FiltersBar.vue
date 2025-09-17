@@ -33,7 +33,7 @@
           class="w-full px-4 py-2 text-left hover:bg-blue-50 hover:text-blue-600 transition-colors first:rounded-t-lg last:rounded-b-lg whitespace-nowrap"
           :class="{ 'bg-blue-100 text-blue-600': selectedFilters[filterKey] === option.id }"
         >
-          {{ option.id }} - {{ option.name }}
+          {{ option.name }}
         </button>
       </div>
     </div>
@@ -77,10 +77,11 @@ const getUniqueOptions = (filterKey: string) => {
   const seen = new Set()
 
   return options.filter(option => {
-    if (seen.has(option.id)) {
+    const key = `${option.id}-${option.name}`
+    if (seen.has(key)) {
       return false
     }
-    seen.add(option.id)
+    seen.add(key)
     return true
   })
 }
