@@ -178,7 +178,7 @@ const sorting = ref<SortingState>([])
 const columnHelper = createColumnHelper<VolumeRow>()
 
 const formatCurrency = (amount: number) => {
-  return `€${amount.toLocaleString('it-IT', {
+  return `${amount.toLocaleString('it-IT', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}`
